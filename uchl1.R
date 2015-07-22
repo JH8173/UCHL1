@@ -183,9 +183,14 @@ cox <- coxph(Surv(OS_M, CURATED_VITAL_STATUS == 'Dead')~
                stage + 
                CURATED_AGE_AT_TCGA_SPECIMEN+
                UCHL1_G, data = data_uchl1)
+
 summary(cox)
 
+sink('cox_analysis_output.txt')
 
+summary(cox)
+
+sink()
 ### survival specimen #####
 data_uchl1$TCGA_M <- as.numeric(as.character(data_uchl1$CURATED_TCGA_DAYS_TO_DEATH_OR_LAST_FU))/30.4
 fit = npsurv(Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.CENSORED...1....DEAD.OF.MELANOMA.. == 1)
@@ -236,3 +241,10 @@ cox <- coxph(Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.
                CURATED_AGE_AT_TCGA_SPECIMEN+
                UCHL1_G, data = data_uchl1)
 summary(cox)
+
+sink('cox_analysis_output.txt', append = TRUE)
+
+summary(cox)
+
+sink()
+

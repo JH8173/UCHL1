@@ -1,0 +1,46 @@
+Call:
+coxph(formula = Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.CENSORED...1....DEAD.OF.MELANOMA.. == 
+    1) ~ stage + CURATED_AGE_AT_TCGA_SPECIMEN + UCHL1_G, data = data_uchl1)
+
+  n= 240, number of events= 94 
+   (230 observations deleted due to missingness)
+
+                                  coef exp(coef)  se(coef)      z Pr(>|z|)
+stageStage III-IV             0.062681  1.064687  0.208322  0.301    0.764
+CURATED_AGE_AT_TCGA_SPECIMEN  0.009647  1.009694  0.007187  1.342    0.179
+UCHL1_GHigh UCHL1 expression -0.142935  0.866810  0.258216 -0.554    0.580
+
+                             exp(coef) exp(-coef) lower .95 upper .95
+stageStage III-IV               1.0647     0.9392    0.7078     1.602
+CURATED_AGE_AT_TCGA_SPECIMEN    1.0097     0.9904    0.9956     1.024
+UCHL1_GHigh UCHL1 expression    0.8668     1.1537    0.5226     1.438
+
+Concordance= 0.54  (se = 0.032 )
+Rsquare= 0.009   (max possible= 0.976 )
+Likelihood ratio test= 2.25  on 3 df,   p=0.5217
+Wald test            = 2.17  on 3 df,   p=0.538
+Score (logrank) test = 2.17  on 3 df,   p=0.5378
+
+Call:
+coxph(formula = Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.CENSORED...1....DEAD.OF.MELANOMA.. == 
+    1) ~ stage + CURATED_AGE_AT_TCGA_SPECIMEN + UCHL1_G, data = data_uchl1)
+
+  n= 240, number of events= 94 
+   (230 observations deleted due to missingness)
+
+                                  coef exp(coef)  se(coef)      z Pr(>|z|)
+stageStage III-IV             0.062681  1.064687  0.208322  0.301    0.764
+CURATED_AGE_AT_TCGA_SPECIMEN  0.009647  1.009694  0.007187  1.342    0.179
+UCHL1_GHigh UCHL1 expression -0.142935  0.866810  0.258216 -0.554    0.580
+
+                             exp(coef) exp(-coef) lower .95 upper .95
+stageStage III-IV               1.0647     0.9392    0.7078     1.602
+CURATED_AGE_AT_TCGA_SPECIMEN    1.0097     0.9904    0.9956     1.024
+UCHL1_GHigh UCHL1 expression    0.8668     1.1537    0.5226     1.438
+
+Concordance= 0.54  (se = 0.032 )
+Rsquare= 0.009   (max possible= 0.976 )
+Likelihood ratio test= 2.25  on 3 df,   p=0.5217
+Wald test            = 2.17  on 3 df,   p=0.538
+Score (logrank) test = 2.17  on 3 df,   p=0.5378
+
