@@ -1,4 +1,4 @@
-setwd('/home/jun/melanoma/')
+setwd('/home/jun/UCHL1/')
 
 #####################################################################################
 
@@ -72,7 +72,10 @@ hist(log(uchl1$UCHL1))
 ID <- gsub('\\.', '-', (gsub('\\.0.', '', rownames(uchl1))))
 df_uchl1 <- data.frame(ID = ID, UCHL1 = uchl1$UCHL1, 
                        log_UCHL1 = log(uchl1$UCHL1+1, base = 10),
-                       UCHL1_G = factor(log(uchl1$UCHL1, base = 10) > 2.5)
+                       UCHL1_G = factor(log(uchl1$UCHL1, base = 10) > 2.5, 
+                                        levels = c(FALSE, TRUE),
+                                        labels = c('Low UCHL1 expression',
+                                                   'High UCHL1 expression'))
                        )
 colnames(data)
 data$ID <- gsub('-0[0-9]{1}', '', data$Name)
@@ -93,3 +96,143 @@ boxplot(log_UCHL1 ~ CURATED_TCGA_SPECIMEN_SITE, data_uchl1)
 a <- aov(log_UCHL1 ~ CURATED_TCGA_SPECIMEN_SITE, data_uchl1)
 summary(a)
 summary(data_uchl1)
+
+########################################################
+
+library(compareGroups)
+
+compareGroups(UCHL1_G~ 
+                CURATED_AGE_AT_INITIAL_PATHOLOGIC_DIAGNOSIS +
+                CURATED_AGE_AT_TCGA_SPECIMEN +
+                GENDER+
+                CURATED_SITE_OF_PRIMARY_TUMOR_KNOWN_PRIMARY_ONLY +
+                REGIONAL_VS_PRIMARY+
+                CURATED_BRESLOW +
+                CURATED_ULCERATION +
+                PIGMENT.SCORE+
+                CURATED_PATHOLOGIC_STAGE_AJCC7_AT_DIAGNOSIS_SIMPLE +
+                MUTATIONSUBTYPES+
+                UV.signature,
+              data = data_uchl1) -> table
+
+table(data$Pathologic_stage, data$uv_g)
+
+createTable(table) -> table
+export2csv(table, 'table.csv')
+
+
+##### Overall survival ######### 
+library(survival)
+library(rms)
+
+
+data_uchl1$OS_M <- as.numeric(as.character(data_uchl1$CURATED_DAYS_TO_DEATH_OR_LAST_FU))/30.4
+fit = npsurv(Surv(OS_M, CURATED_VITAL_STATUS == 'Dead')~
+               UCHL1_G, data = data_uchl1)
+fit
+
+
+strata = levels(data_uchl1$UCHL1_G)
+
+library(Cairo)
+CairoSVG(file = "OS.svg",  width = 6, height = 6, 
+         onefile = TRUE, bg = "transparent",
+         pointsize = 12)
+par(mar=c(6,4,2,8), mgp = c(2, 1, 0))
+survplot(fit,
+         time.inc = 12,
+         xlab = 'Months',
+         lty = c(1:2),
+         conf="none", add=FALSE, 
+         label.curves=FALSE, abbrev.label=FALSE,
+         levels.only=TRUE, lwd=par('lwd'),
+         col=1, col.fill=gray(seq(.95, .75, length=5)),
+         loglog=FALSE,n.risk=TRUE,logt=FALSE,
+         dots=FALSE,
+         grid=FALSE,
+         srt.n.risk=0, sep.n.risk=0.04, adj.n.risk=0.5, 
+         y.n.risk=-0.25, cex.n.risk=0.6, pr=FALSE       
+)
+
+legend(60, 1.0, strata, lty = c(1:2), cex = 0.8,
+       xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,
+       trace = TRUE,
+       bty = 'n')
+
+legend(5.5*12, 0.85, 'P-value = 0.445', cex = 0.8,
+       xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,
+       trace = TRUE,
+       bty = 'n')
+
+dev.off()
+
+diff = survdiff(Surv(OS_M, CURATED_VITAL_STATUS == 'Dead')~
+                  UCHL1_G, data = data_uchl1)
+diff
+
+
+data_uchl1$stage <- 
+  factor(data_uchl1$CURATED_PATHOLOGIC_STAGE_AJCC7_AT_DIAGNOSIS_SIMPLE %in% 
+           c('Stage III' ,'Stage IV'),
+         levels = c(FALSE, TRUE),
+         labels = c('Stage 0-II', 'Stage III-IV'))
+data_uchl1$stage[is.na(data_uchl1$CURATED_PATHOLOGIC_STAGE_AJCC7_AT_DIAGNOSIS_SIMPLE)] <- NA
+summary (data_uchl1$CURATED_PATHOLOGIC_STAGE_AJCC7_AT_DIAGNOSIS_SIMPLE)
+
+cox <- coxph(Surv(OS_M, CURATED_VITAL_STATUS == 'Dead')~
+               stage + 
+               CURATED_AGE_AT_TCGA_SPECIMEN+
+               UCHL1_G, data = data_uchl1)
+summary(cox)
+
+
+### survival specimen #####
+data_uchl1$TCGA_M <- as.numeric(as.character(data_uchl1$CURATED_TCGA_DAYS_TO_DEATH_OR_LAST_FU))/30.4
+fit = npsurv(Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.CENSORED...1....DEAD.OF.MELANOMA.. == 1)
+             ~ UCHL1_G, data = data_uchl1)
+fit
+
+
+strata = levels(data_uchl1$UCHL1_G)
+
+CairoSVG(file = "TCGA.svg",  width = 6, height = 6, 
+         onefile = TRUE, bg = "transparent",
+         pointsize = 12)
+par(mar=c(6,4,2,8), mgp = c(2, 1, 0))
+survplot(fit,
+         time.inc = 12,
+         xlab = 'Months',
+         lty = c(1:2),
+         conf="none", add=FALSE, 
+         label.curves=FALSE, abbrev.label=FALSE,
+         levels.only=TRUE, lwd=par('lwd'),
+         col=1, col.fill=gray(seq(.95, .75, length=5)),
+         loglog=FALSE,n.risk=TRUE,logt=FALSE,
+         dots=FALSE,
+         grid=FALSE,
+         srt.n.risk=0, sep.n.risk=0.04, adj.n.risk=0.5, 
+         y.n.risk=-0.25, cex.n.risk=0.6, pr=FALSE       
+)
+
+legend(60, 1.0, strata, lty = c(1:2), cex = 0.8,
+       xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,
+       trace = TRUE,
+       bty = 'n')
+
+legend(5.5*12, 0.85, 'P-value = 0.691', cex = 0.8,
+       xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,
+       trace = TRUE,
+       bty = 'n')
+
+dev.off()
+
+diff = survdiff(Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.CENSORED...1....DEAD.OF.MELANOMA.. == 1)
+                ~ UCHL1_G, data = data_uchl1)
+diff
+
+
+cox <- coxph(Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.CENSORED...1....DEAD.OF.MELANOMA.. == 1)~
+               stage + 
+               CURATED_AGE_AT_TCGA_SPECIMEN+
+               UCHL1_G, data = data_uchl1)
+summary(cox)
