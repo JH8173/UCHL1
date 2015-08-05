@@ -129,7 +129,7 @@ library(rms)
 
 data_uchl1$OS_M <- as.numeric(as.character(data_uchl1$CURATED_DAYS_TO_DEATH_OR_LAST_FU))/30.4
 fit = npsurv(Surv(OS_M, CURATED_VITAL_STATUS == 'Dead')~
-               UCHL1_G, data = data_uchl1)
+               UCHL1_G, data = subset(data_uchl1, stage == 'Stage III-IV'))
 fit
 
 
@@ -195,7 +195,7 @@ sink()
 ### survival specimen #####
 data_uchl1$TCGA_M <- as.numeric(as.character(data_uchl1$CURATED_TCGA_DAYS_TO_DEATH_OR_LAST_FU))/30.4
 fit = npsurv(Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.CENSORED...1....DEAD.OF.MELANOMA.. == 1)
-             ~ UCHL1_G, data = data_uchl1)
+             ~ UCHL1_G, data = subset(data_uchl1, stage == 'Stage 0-II'))
 fit
 
 
@@ -208,7 +208,7 @@ par(mar=c(6,4,2,8), mgp = c(2, 1, 0))
 survplot(fit,
          time.inc = 12,
          xlab = 'Months',
-         lty = c(1:2),
+         lty = c(1:3),
          conf="none", add=FALSE, 
          label.curves=FALSE, abbrev.label=FALSE,
          levels.only=TRUE, lwd=par('lwd'),
@@ -220,7 +220,7 @@ survplot(fit,
          y.n.risk=-0.25, cex.n.risk=0.6, pr=FALSE       
 )
 
-legend(60, 1.0, strata, lty = c(1:2), cex = 0.8,
+legend(60, 1.0, strata, lty = c(1:3), cex = 0.8,
        xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,
        trace = TRUE,
        bty = 'n')
@@ -238,9 +238,7 @@ diff
 
 
 cox <- coxph(Surv(TCGA_M, CURATED_MELANOMA_SPECIFIC_VITAL_STATUS..0....ALIVE.OR.CENSORED...1....DEAD.OF.MELANOMA.. == 1)~
-               stage + 
-               CURATED_AGE_AT_TCGA_SPECIMEN+
-               UCHL1_G, data = data_uchl1)
+               UCHL1_G + strata(stage), data = data_uchl1)
 summary(cox)
 
 sink('cox_analysis_output.txt', append = TRUE)
