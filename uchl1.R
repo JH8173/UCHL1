@@ -59,12 +59,12 @@ uchl1 <- getProfileData(mycgds,('UCHL1'),mygeneticprofile,mycaselist)
 
 
 hist(uchl1$UCHL1, 
-     breaks = 1000, 
-     xlim = c(0,1000),
+     breaks = 60000, 
+     xlim = c(0,200),
      plot = TRUE
      )
 
-log(200, base = 10)
+log(15, base = 10)
 hist(log(uchl1$UCHL1))
 
 ##### http://www.gtexportal.org/home/gene/UCHL1 ##########
