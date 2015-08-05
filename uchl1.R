@@ -59,8 +59,8 @@ uchl1 <- getProfileData(mycgds,('UCHL1'),mygeneticprofile,mycaselist)
 
 
 hist(uchl1$UCHL1, 
-     breaks = 60000, 
-     xlim = c(0,200),
+     breaks = 6000, 
+     xlim = c(0,2000),
      plot = TRUE
      )
 
@@ -72,9 +72,10 @@ hist(log(uchl1$UCHL1))
 ID <- gsub('\\.', '-', (gsub('\\.0.', '', rownames(uchl1))))
 df_uchl1 <- data.frame(ID = ID, UCHL1 = uchl1$UCHL1, 
                        log_UCHL1 = log(uchl1$UCHL1+1, base = 10),
-                       UCHL1_G = factor(log(uchl1$UCHL1, base = 10) > 2.5, 
-                                        levels = c(FALSE, TRUE),
+                       UCHL1_G = factor(cut(uchl1$UCHL1, breaks = c(-1,100,1000,max(uchl1$UCHL1))), 
+                                        #levels = c((-1,20], (20,100], (100,5.67e+04]),
                                         labels = c('Low UCHL1 expression',
+                                                   'Medium UCHL1 expression',
                                                    'High UCHL1 expression'))
                        )
 colnames(data)
@@ -142,7 +143,7 @@ par(mar=c(6,4,2,8), mgp = c(2, 1, 0))
 survplot(fit,
          time.inc = 12,
          xlab = 'Months',
-         lty = c(1:2),
+         lty = c(1:3),
          conf="none", add=FALSE, 
          label.curves=FALSE, abbrev.label=FALSE,
          levels.only=TRUE, lwd=par('lwd'),
@@ -154,7 +155,7 @@ survplot(fit,
          y.n.risk=-0.25, cex.n.risk=0.6, pr=FALSE       
 )
 
-legend(60, 1.0, strata, lty = c(1:2), cex = 0.8,
+legend(60, 1.0, strata, lty = c(1:3), cex = 0.8,
        xjust = 0, yjust = 1, x.intersp = 1, y.intersp = 1,
        trace = TRUE,
        bty = 'n')
